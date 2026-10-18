@@ -3,8 +3,9 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="theme-color" content="#141318">
-  <title>夜貓讀書室｜Study Board</title>
+  <meta name="theme-color" content="#fff6fa">
+  <title>公主的作業咖啡廳｜Princess Café</title>
+
   <link rel="stylesheet" href="./style.css">
   <script src="./script.js" defer></script>
 </head>
@@ -13,85 +14,134 @@
   <main class="container">
     <header class="page-header">
       <div>
-        <p class="eyebrow">YOUR LITTLE NIGHT STUDY ROOM</p>
-        <h1>夜貓讀書室<span>✦</span></h1>
-        <p class="subtitle">把作業放這裡，我們一件一件來。</p>
+        <p class="eyebrow">PRINCESS MAID CAFÉ · OPEN FOR STUDY</p>
+        <h1>公主的作業咖啡廳 <span>୨୧</span></h1>
+        <p class="subtitle">
+          歡迎光臨 ♡ 今天的作業，公主陪你一起完成。
+        </p>
       </div>
-      <time id="today"></time>
+
+      <div class="header-right">
+        <span class="open-sign">♡ 營業中</span>
+        <time id="today"></time>
+      </div>
     </header>
 
     <section class="dashboard" aria-label="學習進度">
       <div class="panel stat-panel">
         <div class="stat-heading">
-          <span class="section-label">任務完成進度</span>
+          <span class="section-label">TODAY'S PROGRESS</span>
           <strong id="progress-percent">0%</strong>
         </div>
+
+        <h2 class="stat-title">今日的努力甜度</h2>
         <p id="progress-text">已完成 0 / 0 項任務</p>
-        <progress id="task-progress" value="0" max="100">0%</progress>
+
+        <progress
+          id="task-progress"
+          value="0"
+          max="100"
+          aria-label="任務完成進度"
+        >0%</progress>
       </div>
 
-      <div class="panel stat-panel">
+      <div class="panel stat-panel level-panel">
         <div class="stat-heading">
-          <span class="level-label" id="level-label">Lv.1</span>
-          <span id="level-title">開學迷路人</span>
+          <span id="level-label" class="level-label">Lv.1</span>
+          <span id="level-title">初次來店的小客人</span>
         </div>
-        <p id="exp-text">0 / 100 EXP · 距離升級還差 100 EXP</p>
-        <progress id="exp-progress" value="0" max="100">0 EXP</progress>
+
+        <h2 class="stat-title">公主的集點小卡</h2>
+        <p id="exp-text">0 / 100 EXP · 再 100 EXP 升級</p>
+
+        <progress
+          id="exp-progress"
+          value="0"
+          max="100"
+          aria-label="升級經驗值"
+        >0 EXP</progress>
       </div>
     </section>
 
     <div class="workspace">
       <aside class="sidebar">
-        <section class="panel companion-panel" aria-label="黑貓讀書夥伴">
+        <section class="panel companion-panel" aria-label="銀狐倉鼠公主">
           <div class="companion-heading">
-            <span class="section-label">陪讀夥伴</span>
-            <span class="online"><i></i> 小墨在線</span>
+            <span class="section-label">今日值班小女僕</span>
+            <span class="online"><i></i> 公主為您服務</span>
           </div>
 
-          <div class="cat-stage">
-            <span class="decor-star star-one" aria-hidden="true">✦</span>
+          <div class="hamster-stage">
+            <span class="decor-star star-one" aria-hidden="true">♡</span>
             <span class="decor-star star-two" aria-hidden="true">✧</span>
+            <span class="decor-star star-three" aria-hidden="true">✦</span>
 
             <button
-              id="cat-button"
-              class="cat-button"
+              id="princess-button"
+              class="princess-button"
               type="button"
-              aria-label="摸摸小黑貓，聽一句鼓勵"
+              aria-label="摸摸銀狐倉鼠公主，聽一句鼓勵"
             >
-              <span id="cat" class="cat" aria-hidden="true">
-                <span class="cat-tail"></span>
-                <span class="cat-body"></span>
-                <span class="cat-ear left"></span>
-                <span class="cat-ear right"></span>
-                <span class="cat-head">
-                  <span class="cat-eye left"></span>
-                  <span class="cat-eye right"></span>
-                  <span class="cat-nose"></span>
-                  <span class="cat-cheek left"></span>
-                  <span class="cat-cheek right"></span>
-                  <span class="cat-whisker left"></span>
-                  <span class="cat-whisker right"></span>
+              <span id="princess" class="hamster" aria-hidden="true">
+                <span class="hamster-ear left"></span>
+                <span class="hamster-ear right"></span>
+
+                <span class="hamster-body"></span>
+
+                <span class="maid-dress">
+                  <span class="maid-apron"></span>
+                  <span class="apron-heart">♥</span>
+                  <span class="maid-bow"></span>
                 </span>
-                <span class="cat-paw left"></span>
-                <span class="cat-paw right"></span>
+
+                <span class="hamster-arm left"></span>
+                <span class="hamster-arm right"></span>
+
+                <span class="hamster-head">
+                  <span class="hamster-stripe"></span>
+                  <span class="hamster-face"></span>
+                  <span class="hamster-eye left"></span>
+                  <span class="hamster-eye right"></span>
+                  <span class="hamster-blush left"></span>
+                  <span class="hamster-blush right"></span>
+                  <span class="hamster-nose"></span>
+                  <span class="hamster-mouth">ω</span>
+                  <span class="hamster-whisker left"></span>
+                  <span class="hamster-whisker right"></span>
+                </span>
+
+                <span class="maid-headband">
+                  <span class="headband-bow"></span>
+                </span>
+
+                <span class="hamster-foot left"></span>
+                <span class="hamster-foot right"></span>
               </span>
             </button>
 
-            <div class="cat-shadow"></div>
+            <div class="hamster-shadow"></div>
+          </div>
+
+          <div class="princess-name">
+            <span>୨୧</span> 公主 <span>୨୧</span>
           </div>
 
           <div class="speech">
-            <p id="cat-message" aria-live="polite">
-              今天很和平，要先記下作業嗎？
+            <p id="princess-message" aria-live="polite">
+              歡迎光臨♡ 要先記下今天的作業嗎？
             </p>
           </div>
-          <p class="pet-hint">點一下小墨，領取一點精神支援。</p>
+
+          <p class="pet-hint">輕輕摸摸公主，領取今日份的鼓勵 ♡</p>
         </section>
 
         <section class="panel form-panel">
           <div class="section-heading">
-            <h2 id="form-title">新增任務</h2>
-            <span class="tiny-label">NEW QUEST</span>
+            <div>
+              <p class="tiny-label">PLACE YOUR ORDER</p>
+              <h2 id="form-title">新增作業訂單</h2>
+            </div>
+            <span class="heading-decoration" aria-hidden="true">✎</span>
           </div>
 
           <form id="task-form">
@@ -112,7 +162,7 @@
                 id="content"
                 rows="3"
                 maxlength="500"
-                placeholder="這次需要完成什麼？"
+                placeholder="今天需要完成什麼呢？"
                 required
               ></textarea>
             </div>
@@ -123,7 +173,7 @@
             </div>
 
             <button id="submit-button" class="primary-button" type="submit">
-              ＋ 收進任務板
+              ＋ 送出作業訂單
             </button>
 
             <button
@@ -136,16 +186,19 @@
             </button>
           </form>
 
-          <p class="storage-note">自動儲存於此瀏覽器 · 不會跨裝置同步</p>
+          <p class="storage-note">
+            自動儲存於此瀏覽器 · 不會跨裝置同步
+          </p>
         </section>
       </aside>
 
       <section class="panel list-panel" aria-labelledby="list-title">
         <div class="section-heading">
           <div>
-            <p class="tiny-label">ONE TASK AT A TIME</p>
-            <h2 id="list-title">我的任務</h2>
+            <p class="tiny-label">YOUR LITTLE STUDY MENU</p>
+            <h2 id="list-title">我的作業菜單</h2>
           </div>
+
           <span id="task-count" class="count-badge">0 項</span>
         </div>
 
@@ -157,12 +210,14 @@
               data-filter="all"
               aria-pressed="true"
             >全部</button>
+
             <button
               type="button"
               class="filter-button"
               data-filter="pending"
               aria-pressed="false"
             >未完成</button>
+
             <button
               type="button"
               class="filter-button"
@@ -170,20 +225,27 @@
               aria-pressed="false"
             >已完成</button>
           </div>
-          <span class="sort-note">依期限排序</span>
+
+          <span class="sort-note">依繳交期限排序 ↗</span>
         </div>
 
         <div id="task-list" class="task-list"></div>
 
-        <p class="exp-note">
-          ✦ 每完成一項任務 +20 EXP，每累積 100 EXP 升一級。
-        </p>
+        <div class="cafe-note">
+          <span aria-hidden="true">୨୧</span>
+          <p>
+            每完成一項作業 +20 EXP，每 100 EXP 升一級。<br>
+            取消完成或刪除已完成作業，會扣回對應經驗值。
+          </p>
+        </div>
       </section>
     </div>
 
     <p id="storage-warning" class="storage-warning" role="alert" hidden></p>
 
-    <footer>慢慢來，你和小墨都做得很好。</footer>
+    <footer>
+      ♡ PRINCESS CAFÉ · 每一份努力，都值得一點甜 ♡
+    </footer>
   </main>
 
   <div id="effects" class="effects" aria-hidden="true"></div>
