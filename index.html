@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#141318">
+  <title>Study Board｜讀書任務板</title>
+  <link rel="stylesheet" href="./style.css">
+  <script src="./script.js" defer></script>
+</head>
+
+<body>
+  <main class="container">
+    <header class="page-header">
+      <div>
+        <p class="eyebrow">STUDY BOARD</p>
+        <h1>讀書任務板<span>。</span></h1>
+        <p class="subtitle">整理課業，留一點空間給生活。</p>
+      </div>
+      <time id="today" class="today"></time>
+    </header>
+
+    <section class="panel progress-panel" aria-label="任務完成進度">
+      <div class="progress-heading">
+        <div>
+          <p class="section-label">你的學習進度</p>
+          <p id="progress-text" class="progress-text">已完成 0 / 0 項任務</p>
+        </div>
+        <strong id="progress-percent">0%</strong>
+      </div>
+
+      <progress id="progress-bar" value="0" max="100">0%</progress>
+    </section>
+
+    <div class="workspace">
+      <aside class="panel form-panel">
+        <div class="section-header">
+          <h2 id="form-title">新增任務</h2>
+          <span class="small-label">TASK</span>
+        </div>
+
+        <form id="task-form">
+          <div class="field">
+            <label for="course">課程名稱</label>
+            <input
+              id="course"
+              type="text"
+              placeholder="例如：資料庫管理"
+              maxlength="40"
+              required
+            >
+          </div>
+
+          <div class="field">
+            <label for="content">作業內容</label>
+            <textarea
+              id="content"
+              placeholder="這次需要完成什麼？"
+              maxlength="500"
+              rows="4"
+              required
+            ></textarea>
+          </div>
+
+          <div class="field">
+            <label for="deadline">繳交期限</label>
+            <input id="deadline" type="datetime-local" required>
+          </div>
+
+          <button id="submit-button" class="primary-button" type="submit">
+            ＋ 新增任務
+          </button>
+
+          <button
+            id="cancel-edit"
+            class="secondary-button"
+            type="button"
+            hidden
+          >
+            取消修改
+          </button>
+        </form>
+
+        <p class="storage-note">
+          紀錄會自動儲存在此瀏覽器。
+        </p>
+      </aside>
+
+      <section class="panel list-panel" aria-labelledby="list-title">
+        <div class="section-header">
+          <h2 id="list-title">任務清單</h2>
+          <span id="task-count" class="small-label">0 項任務</span>
+        </div>
+
+        <div class="filters" role="group" aria-label="篩選任務">
+          <button
+            class="filter-button active"
+            data-filter="all"
+            type="button"
+            aria-pressed="true"
+          >
+            全部
+          </button>
+          <button
+            class="filter-button"
+            data-filter="pending"
+            type="button"
+            aria-pressed="false"
+          >
+            未完成
+          </button>
+          <button
+            class="filter-button"
+            data-filter="completed"
+            type="button"
+            aria-pressed="false"
+          >
+            已完成
+          </button>
+        </div>
+
+        <div id="task-list" class="task-list"></div>
+      </section>
+    </div>
+
+    <p id="message" class="message" role="status" aria-live="polite"></p>
+
+    <footer>ONE TASK AT A TIME.</footer>
+  </main>
+</body>
+</html>
