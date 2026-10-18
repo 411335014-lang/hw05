@@ -1,6 +1,6 @@
 "use strict";
 
-// 沿用舊版儲存名稱，保留先前建立的任務。
+// 沿用先前的名稱，保留同一網站內的舊任務紀錄。
 const STORAGE_KEY = "study-board-v1";
 const EXP_PER_TASK = 20;
 const EXP_PER_LEVEL = 100;
@@ -12,23 +12,23 @@ const courseInput = $("#course");
 const contentInput = $("#content");
 const deadlineInput = $("#deadline");
 const taskList = $("#task-list");
-const cat = $("#cat");
-const catMessage = $("#cat-message");
+const princess = $("#princess");
+const princessMessage = $("#princess-message");
 const toast = $("#toast");
 
 let tasks = [];
-let filter = "all";
+let currentFilter = "all";
 let editingId = null;
 let storageReady = true;
 let toastTimer;
 let speechTimer;
-let catTimer;
+let animationTimer;
 let temporarySpeech = false;
 
 function warnStorage(text) {
   const warning = $("#storage-warning");
-  warning.hidden = false;
   warning.textContent = text;
+  warning.hidden = false;
 }
 
 function loadTasks() {
@@ -63,14 +63,18 @@ function loadTasks() {
         return true;
       });
 
-    if (!valid) throw new Error("Invalid task data");
+    if (!valid) {
+      throw new Error("Invalid saved tasks");
+    }
 
     return parsed;
   } catch {
     storageReady = false;
+
     warnStorage(
-      "無法讀取儲存紀錄。目前變更只會保留在此頁，請勿關閉或重新整理；原有儲存資料不會被覆蓋。"
+      "無法讀取儲存紀錄。目前變更只保留在此頁，請勿關閉或重新整理；原有資料不會被覆蓋。"
     );
+
     return [];
   }
 }
@@ -84,20 +88,26 @@ function saveTasks() {
     return true;
   } catch {
     warnStorage(
-      "儲存失敗。目前變更只保留在此頁，請勿關閉或重新整理，並檢查瀏覽器的儲存設定與空間。"
+      "儲存失敗。目前變更只保留在此頁，請勿關閉或重新整理，並檢查瀏覽器儲存空間或設定。"
     );
+
     return false;
   }
 }
 
 function showToast(text) {
   clearTimeout(toastTimer);
+
   toast.textContent = text;
   toast.classList.add("visible");
 
   toastTimer = setTimeout(() => {
     toast.classList.remove("visible");
-  }, 3200);
+  }, 3500);
+}
+
+function notifyChange(text, saved) {
+  showToast(saved ? text : `${text}（尚未保存，請勿關閉頁面）`);
 }
 
 function createId() {
@@ -106,37 +116,37 @@ function createId() {
 }
 
 function getStats() {
-  const completed = tasks.filter((task) => task.completed).length;
   const total = tasks.length;
+  const completed = tasks.filter((task) => task.completed).length;
   const exp = completed * EXP_PER_TASK;
 
   return {
     total,
     completed,
-    percent: total ? Math.round((completed / total) * 100) : 0,
     exp,
+    percent: total ? Math.round((completed / total) * 100) : 0,
     level: Math.floor(exp / EXP_PER_LEVEL) + 1,
     levelExp: exp % EXP_PER_LEVEL
   };
 }
 
 function getTitle(level) {
-  if (level >= 10) return "Deadline 馴獸師";
-  if (level >= 8) return "黑貓認證學霸";
-  if (level >= 5) return "讀書漸入佳境";
-  if (level >= 3) return "作業練習生";
-  return "開學迷路人";
+  if (level >= 10) return "公主認證・作業大師";
+  if (level >= 8) return "咖啡廳榮譽貴賓";
+  if (level >= 5) return "午後讀書常客";
+  if (level >= 3) return "甜點級努力家";
+  return "初次來店的小客人";
 }
 
 function getProgressMessage() {
   const stats = getStats();
 
   if (stats.total === 0) {
-    return "今天很和平，要先記下作業嗎？";
+    return "歡迎光臨♡ 要先記下今天的作業嗎？";
   }
 
   if (stats.completed === stats.total) {
-    return "清空了！可以理直氣壯去躺了。";
+    return "作業全數完成♡ 公主為你送上甜點與掌聲！";
   }
 
   const hasOverdue = tasks.some(
@@ -146,30 +156,31 @@ function getProgressMessage() {
   );
 
   if (hasOverdue) {
-    return "有作業遲到了，我們先看看那一件。";
+    return "有一份作業等比較久了，公主陪你看看，好嗎？";
   }
 
   if (stats.completed === 0) {
-    return "先挑一件，我陪你。";
+    return "今日的讀書套餐準備好了♡ 先從一小步開始吧。";
   }
 
   if (stats.completed / stats.total < 0.5) {
-    return "有在前進喔，慢慢來。";
+    return "已經完成一些了♡ 公主有把你的努力記下來喔。";
   }
 
-  return "已經過半了，剩下的逐個解決。";
+  return "進度過半了♡ 先喝口茶，再一起慢慢完成。";
 }
 
 function updateSpeech() {
   if (!temporarySpeech) {
-    catMessage.textContent = getProgressMessage();
+    princessMessage.textContent = getProgressMessage();
   }
 }
 
-function speak(text, duration = 4000) {
+function speak(text, duration = 4500) {
   clearTimeout(speechTimer);
+
   temporarySpeech = true;
-  catMessage.textContent = text;
+  princessMessage.textContent = text;
 
   speechTimer = setTimeout(() => {
     temporarySpeech = false;
@@ -177,16 +188,17 @@ function speak(text, duration = 4000) {
   }, duration);
 }
 
-function animateCat() {
-  clearTimeout(catTimer);
-  cat.classList.remove("happy");
+function animatePrincess() {
+  clearTimeout(animationTimer);
+  princess.classList.remove("happy");
 
-  // 重新開始同一個動畫。
-  void cat.offsetWidth;
-  cat.classList.add("happy");
+  // 讓連續點擊也能重新播放動畫。
+  void princess.offsetWidth;
 
-  catTimer = setTimeout(() => {
-    cat.classList.remove("happy");
+  princess.classList.add("happy");
+
+  animationTimer = setTimeout(() => {
+    princess.classList.remove("happy");
   }, 700);
 }
 
@@ -195,7 +207,7 @@ function burstStars(x, y) {
     return;
   }
 
-  const layer = $("#effects");
+  const effects = $("#effects");
 
   for (let i = 0; i < 12; i++) {
     const star = document.createElement("span");
@@ -203,25 +215,27 @@ function burstStars(x, y) {
     const distance = 35 + Math.random() * 65;
 
     star.className = "sparkle";
-    star.textContent = i % 2 === 0 ? "✦" : "✧";
+    star.textContent = i % 3 === 0 ? "♡" : "✦";
     star.style.left = `${x}px`;
     star.style.top = `${y}px`;
     star.style.fontSize = `${12 + Math.random() * 14}px`;
+
     star.style.setProperty(
       "--dx",
       `${Math.cos(angle) * distance}px`
     );
+
     star.style.setProperty(
       "--dy",
       `${Math.sin(angle) * distance - 35}px`
     );
 
-    layer.append(star);
+    effects.append(star);
     setTimeout(() => star.remove(), 1100);
   }
 }
 
-function localDateValue(value) {
+function toLocalInputValue(value) {
   const date = new Date(value);
   const pad = (number) => String(number).padStart(2, "0");
 
@@ -234,9 +248,9 @@ function localDateValue(value) {
 
 function formatDeadline(value) {
   return new Date(value).toLocaleString("zh-TW", {
+    year: "numeric",
     month: "2-digit",
     day: "2-digit",
-    year: "numeric",
     hour: "2-digit",
     minute: "2-digit",
     hour12: false
@@ -245,20 +259,32 @@ function formatDeadline(value) {
 
 function getStatus(task) {
   if (task.completed) {
-    return { text: "已完成 +20 EXP", className: "done" };
+    return {
+      text: "已完成 +20 EXP",
+      className: "done"
+    };
   }
 
   const remaining = new Date(task.deadline).getTime() - Date.now();
 
   if (remaining <= 0) {
-    return { text: "已逾期", className: "overdue" };
+    return {
+      text: "已逾期",
+      className: "overdue"
+    };
   }
 
   if (remaining <= 24 * 60 * 60 * 1000) {
-    return { text: "24 小時內到期", className: "soon" };
+    return {
+      text: "24 小時內到期",
+      className: "soon"
+    };
   }
 
-  return { text: "進行中", className: "" };
+  return {
+    text: "進行中",
+    className: ""
+  };
 }
 
 function resetForm() {
@@ -269,8 +295,8 @@ function resetForm() {
     input.setCustomValidity("");
   });
 
-  $("#form-title").textContent = "新增任務";
-  $("#submit-button").textContent = "＋ 收進任務板";
+  $("#form-title").textContent = "新增作業訂單";
+  $("#submit-button").textContent = "＋ 送出作業訂單";
   $("#cancel-edit").hidden = true;
 }
 
@@ -283,13 +309,17 @@ function startEditing(id) {
 
   courseInput.value = task.course;
   contentInput.value = task.content;
-  deadlineInput.value = localDateValue(task.deadline);
+  deadlineInput.value = toLocalInputValue(task.deadline);
 
-  $("#form-title").textContent = "修改任務";
-  $("#submit-button").textContent = "儲存修改";
+  $("#form-title").textContent = "修改作業訂單";
+  $("#submit-button").textContent = "♡ 儲存修改";
   $("#cancel-edit").hidden = false;
 
-  form.scrollIntoView({ behavior: "smooth", block: "center" });
+  form.scrollIntoView({
+    behavior: "smooth",
+    block: "center"
+  });
+
   courseInput.focus({ preventScroll: true });
 }
 
@@ -297,11 +327,11 @@ function deleteTask(id) {
   const task = tasks.find((item) => item.id === id);
   if (!task) return;
 
-  const explanation = task.completed
-    ? "\n刪除後，也會扣回這項任務的 20 EXP。"
+  const extra = task.completed
+    ? "\n刪除後，也會扣回這項作業的 20 EXP。"
     : "";
 
-  if (!window.confirm(`確定刪除「${task.course}」這項任務嗎？${explanation}`)) {
+  if (!window.confirm(`確定刪除「${task.course}」這項作業嗎？${extra}`)) {
     return;
   }
 
@@ -309,9 +339,14 @@ function deleteTask(id) {
 
   if (editingId === id) resetForm();
 
-  saveTasks();
+  const saved = saveTasks();
   render();
-  showToast("任務已刪除。");
+
+  document.querySelector(".filter-button.active")?.focus({
+    preventScroll: true
+  });
+
+  notifyChange("作業訂單已刪除。", saved);
 }
 
 function toggleTask(id, checkbox) {
@@ -323,22 +358,15 @@ function toggleTask(id, checkbox) {
 
   task.completed = checkbox.checked;
 
-  saveTasks();
-
-  // 切換篩選或排序後，讓鍵盤焦點仍有合理的位置。
-  const keepTaskVisible =
-    filter === "all" ||
-    (filter === "completed" && task.completed) ||
-    (filter === "pending" && !task.completed);
-
+  const saved = saveTasks();
   render();
 
-  if (keepTaskVisible) {
-    const nextCheckbox = Array.from(
-      taskList.querySelectorAll(".task-checkbox")
-    ).find((item) => item.dataset.taskId === id);
+  const nextCheckbox = Array.from(
+    taskList.querySelectorAll(".task-checkbox")
+  ).find((item) => item.dataset.taskId === id);
 
-    nextCheckbox?.focus({ preventScroll: true });
+  if (nextCheckbox) {
+    nextCheckbox.focus({ preventScroll: true });
   } else {
     document.querySelector(".filter-button.active")?.focus({
       preventScroll: true
@@ -346,32 +374,42 @@ function toggleTask(id, checkbox) {
   }
 
   if (task.completed) {
-    burstStars(rect.left + rect.width / 2, rect.top + rect.height / 2);
-    animateCat();
+    burstStars(
+      rect.left + rect.width / 2,
+      rect.top + rect.height / 2
+    );
+
+    animatePrincess();
 
     const stats = getStats();
 
     if (stats.level > previousLevel) {
-      showToast(`✦ 升級！Lv.${stats.level} · ${getTitle(stats.level)}`);
-      speak("升級了！這是你一件一件完成的證明。");
+      notifyChange(
+        `♡ 升級！Lv.${stats.level} · ${getTitle(stats.level)}`,
+        saved
+      );
+
+      speak("恭喜升級♡ 公主為努力的你獻上蝴蝶結！");
     } else {
-      showToast("✦ 又少一件事了！+20 EXP");
+      notifyChange("♡ 完成一份作業訂單！+20 EXP", saved);
     }
   } else {
-    showToast("已取消完成，扣回 20 EXP。");
+    notifyChange("已取消完成，扣回 20 EXP。", saved);
   }
 }
 
-function actionButton(label, className, handler) {
+function createActionButton(text, className, handler) {
   const button = document.createElement("button");
+
   button.type = "button";
   button.className = `action-button ${className}`;
-  button.textContent = label;
+  button.textContent = text;
   button.addEventListener("click", handler);
+
   return button;
 }
 
-function createCard(task) {
+function createTaskCard(task) {
   const status = getStatus(task);
   const card = document.createElement("article");
 
@@ -386,6 +424,7 @@ function createCard(task) {
   checkbox.className = "task-checkbox";
   checkbox.dataset.taskId = task.id;
   checkbox.checked = task.completed;
+
   checkbox.setAttribute(
     "aria-label",
     `${task.completed ? "取消完成" : "標記完成"}：${task.course}，${task.content}`
@@ -422,8 +461,8 @@ function createCard(task) {
   actions.className = "task-actions";
 
   actions.append(
-    actionButton("修改", "", () => startEditing(task.id)),
-    actionButton("刪除", "delete", () => deleteTask(task.id))
+    createActionButton("修改", "", () => startEditing(task.id)),
+    createActionButton("刪除", "delete", () => deleteTask(task.id))
   );
 
   top.append(course, badge);
@@ -443,6 +482,7 @@ function renderDashboard() {
   });
 
   $("#progress-percent").textContent = `${stats.percent}%`;
+
   $("#progress-text").textContent =
     `已完成 ${stats.completed} / ${stats.total} 項任務`;
 
@@ -454,16 +494,18 @@ function renderDashboard() {
 
   $("#exp-text").textContent =
     `${stats.levelExp} / ${EXP_PER_LEVEL} EXP · ` +
-    `距離升級還差 ${EXP_PER_LEVEL - stats.levelExp} EXP`;
+    `再 ${EXP_PER_LEVEL - stats.levelExp} EXP 升級`;
 
   $("#exp-progress").value = stats.levelExp;
   $("#exp-progress").textContent = `${stats.levelExp} EXP`;
+
   $("#exp-progress").setAttribute(
     "aria-label",
     `等級 ${stats.level}，升級經驗值 ${stats.levelExp} / ${EXP_PER_LEVEL}`
   );
 
   $("#task-count").textContent = `${stats.total} 項`;
+
   updateSpeech();
 }
 
@@ -472,8 +514,8 @@ function renderList() {
 
   const visible = tasks
     .filter((task) => {
-      if (filter === "pending") return !task.completed;
-      if (filter === "completed") return task.completed;
+      if (currentFilter === "pending") return !task.completed;
+      if (currentFilter === "completed") return task.completed;
       return true;
     })
     .sort((a, b) => {
@@ -490,21 +532,21 @@ function renderList() {
 
     const icon = document.createElement("span");
     icon.className = "empty-icon";
-    icon.textContent = "☾";
+    icon.textContent = "୨୧";
     icon.setAttribute("aria-hidden", "true");
 
     const title = document.createElement("p");
     const hint = document.createElement("small");
 
     if (tasks.length === 0) {
-      title.textContent = "任務板還很安靜";
-      hint.textContent = "記下第一項作業，讓小墨陪你開始。";
-    } else if (filter === "pending") {
-      title.textContent = "目前沒有未完成任務";
-      hint.textContent = "今天的你，值得一點休息。";
+      title.textContent = "今天的作業菜單還是空白的";
+      hint.textContent = "記下第一項作業，讓公主陪你開始♡";
+    } else if (currentFilter === "pending") {
+      title.textContent = "所有作業都已送餐完成♡";
+      hint.textContent = "辛苦了，現在可以享用休息時光。";
     } else {
-      title.textContent = "這裡還沒有已完成任務";
-      hint.textContent = "完成第一件事，就能收到一點星光。";
+      title.textContent = "還沒有完成的作業訂單";
+      hint.textContent = "完成第一件事，就能收集一點星光。";
     }
 
     empty.append(icon, title, hint);
@@ -512,12 +554,27 @@ function renderList() {
     return;
   }
 
-  visible.forEach((task) => taskList.append(createCard(task)));
+  visible.forEach((task) => {
+    taskList.append(createTaskCard(task));
+  });
 }
 
 function render() {
   renderDashboard();
   renderList();
+}
+
+function setFilter(value) {
+  currentFilter = value;
+
+  document.querySelectorAll(".filter-button").forEach((button) => {
+    const active = button.dataset.filter === currentFilter;
+
+    button.classList.toggle("active", active);
+    button.setAttribute("aria-pressed", String(active));
+  });
+
+  render();
 }
 
 form.addEventListener("submit", (event) => {
@@ -527,8 +584,14 @@ form.addEventListener("submit", (event) => {
   const content = contentInput.value.trim();
   const deadline = deadlineInput.value;
 
-  courseInput.setCustomValidity(course ? "" : "請輸入課程名稱。");
-  contentInput.setCustomValidity(content ? "" : "請輸入作業內容。");
+  courseInput.setCustomValidity(
+    course ? "" : "請輸入課程名稱。"
+  );
+
+  contentInput.setCustomValidity(
+    content ? "" : "請輸入作業內容。"
+  );
+
   deadlineInput.setCustomValidity(
     Number.isFinite(new Date(deadline).getTime())
       ? ""
@@ -544,11 +607,15 @@ form.addEventListener("submit", (event) => {
 
     if (!task) {
       resetForm();
-      showToast("找不到這項任務，請重新操作。");
+      showToast("找不到這項作業，請重新操作。");
       return;
     }
 
-    Object.assign(task, { course, content, deadline });
+    Object.assign(task, {
+      course,
+      content,
+      deadline
+    });
   } else {
     tasks.push({
       id: createId(),
@@ -559,14 +626,22 @@ form.addEventListener("submit", (event) => {
     });
   }
 
-  saveTasks();
+  const saved = saveTasks();
+
   resetForm();
 
-  // 新增後切回全部，確保能看見剛建立的任務。
-  if (!wasEditing) setFilter("all");
-  else render();
+  if (!wasEditing) {
+    setFilter("all");
+  } else {
+    render();
+  }
 
-  showToast(wasEditing ? "修改好了，小墨幫你記住了。" : "收到新任務，一起慢慢解決。");
+  notifyChange(
+    wasEditing
+      ? "修改好了♡ 公主幫你記住了。"
+      : "已收到您的作業訂單♡",
+    saved
+  );
 });
 
 [courseInput, contentInput, deadlineInput].forEach((input) => {
@@ -575,19 +650,10 @@ form.addEventListener("submit", (event) => {
   });
 });
 
-$("#cancel-edit").addEventListener("click", resetForm);
-
-function setFilter(value) {
-  filter = value;
-
-  document.querySelectorAll(".filter-button").forEach((button) => {
-    const active = button.dataset.filter === filter;
-    button.classList.toggle("active", active);
-    button.setAttribute("aria-pressed", String(active));
-  });
-
-  render();
-}
+$("#cancel-edit").addEventListener("click", () => {
+  resetForm();
+  courseInput.focus();
+});
 
 document.querySelectorAll(".filter-button").forEach((button) => {
   button.addEventListener("click", () => {
@@ -596,18 +662,19 @@ document.querySelectorAll(".filter-button").forEach((button) => {
 });
 
 const encouragements = [
-  "先寫一題也算有寫。",
-  "你負責努力，我負責在旁邊可愛。",
-  "不必一次完成全部，先做下一小步。",
-  "喝口水，肩膀放鬆一下。",
-  "卡住的話，先把題目看懂也算進度。",
-  "今天的努力，我有看到喔。",
-  "摸貓可以，但等一下要回去寫作業喔。"
+  "歡迎光臨♡ 今日推薦：先完成最小的一項作業。",
+  "公主的臉頰很軟，但不可以一直摸到忘記寫作業喔。",
+  "為你送上一杯勇氣紅茶♡ 慢慢來就好。",
+  "今天不用完美，有前進一點就很棒了。",
+  "讀書辛苦了♡ 要不要喝口水、伸個懶腰？",
+  "公主把你的努力，全部收進小圍裙口袋裡了。",
+  "就算只完成一題，也值得公主為你鼓掌♡",
+  "女僕公主隨時待命♡ 我們一起處理下一件事。"
 ];
 
 let lastEncouragement = -1;
 
-$("#cat-button").addEventListener("click", () => {
+$("#princess-button").addEventListener("click", () => {
   let next;
 
   do {
@@ -615,19 +682,23 @@ $("#cat-button").addEventListener("click", () => {
   } while (next === lastEncouragement);
 
   lastEncouragement = next;
-  animateCat();
+
+  animatePrincess();
   speak(encouragements[next]);
 });
 
-// 更新期限標籤，不重建清單，避免打斷鍵盤操作。
+// 定時更新期限標示，不重建清單，避免打斷鍵盤操作。
 function refreshTimeStatus() {
   renderDashboard();
 
-  const byId = new Map(tasks.map((task) => [task.id, task]));
+  const taskMap = new Map(
+    tasks.map((task) => [task.id, task])
+  );
 
   taskList.querySelectorAll(".task-card").forEach((card) => {
     const checkbox = card.querySelector(".task-checkbox");
-    const task = byId.get(checkbox.dataset.taskId);
+    const task = taskMap.get(checkbox.dataset.taskId);
+
     if (!task) return;
 
     const status = getStatus(task);
@@ -635,7 +706,11 @@ function refreshTimeStatus() {
 
     badge.className = `badge ${status.className}`;
     badge.textContent = status.text;
-    card.classList.toggle("overdue-card", status.className === "overdue");
+
+    card.classList.toggle(
+      "overdue-card",
+      status.className === "overdue"
+    );
   });
 }
 
